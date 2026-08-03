@@ -1,0 +1,104 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+def main():
+    file_path = "US_Accidents.csv"
+    
+  
+    if not os.path.exists(file_path):
+        print("Dataset file not found! Generating sample dataset for testing...")
+        
+        np.random.seed(42)
+        n = 1000
+        
+        hours = np.random.randint(0, 24, n)
+        days = np.random.choice(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], n)
+        weather = np.random.choice(['Fair', 'Clear', 'Mostly Cloudy', 'Overcast', 'Light Rain', 'Fog'], n)
+        severity = np.random.choice([1, 2, 3, 4], n, p=[0.1, 0.6, 0.2, 0.1])
+        lat = np.random.uniform(25.0, 49.0, n)
+        lng = np.random.uniform(-125.0, -66.0, n)
+        
+        df = pd.DataFrame({
+            'Start_Time': pd.date_range(start='2023-01-01', periods=n, freq='h'),
+            'Hour': hours,
+            'Day_of_Week': days,
+            'Weather_Condition': weather,
+            'Severity': severity,
+            'Start_Lat': lat,
+            'Start_Lng': lng,
+            'Crossing': np.random.choice([0, 1], n),
+            'Junction': np.random.choice([0, 1], n),
+            'Railway': np.random.choice([0, 1], n),
+            'Stop': np.random.choice([0, 1], n),
+            'Traffic_Signal': np.random.choice([0, 1], n)
+        })
+    else:
+        print("Loading Traffic Accident Dataset...")
+        df = pd.read_csv(file_path)
+        df['Start_Time'] = pd.to_datetime(df['Start_Time'], errors='coerce')
+        df['Hour'] = df['Start_Time'].dt.hour
+        df['Day_of_Week'] = df['Start_Time'].dt.day_name()
+
+    sns.set_theme(style="whitegrid")
+
+  
+    plt.figure(figsize=(10, 5))
+    sns.countplot(data=df, x='Hour', palette='magma')
+    plt.title("Accident Frequency by Hour of Day", fontsize=14, fontweight='bold')
+    plt.xlabel("Hour (0 - 23)", fontsize=12)
+    plt.ylabel("Accident Count", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    plt.figure(figsize=(10, 5))
+    sns.countplot(data=df, x='Day_of_Week', order=days, palette='viridis')
+    plt.title("Accident Frequency by Day of Week", fontsize=14, fontweight='bold')
+    plt.xlabel("Day of Week", fontsize=12)
+    plt.ylabel("Accident Count", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+    
+    plt.figure(figsize=(10, 5))
+    top_weather = df['Weather_Condition'].value_counts().head(8)
+    sns.barplot(x=top_weather.values, y=top_weather.index, palette='crest')
+    plt.title("Top Weather Conditions During Accidents", fontsize=14, fontweight='bold')
+    plt.xlabel("Accident Count", fontsize=12)
+    plt.ylabel("Weather Condition", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+    road_features = ['Crossing', 'Junction', 'Railway', 'Stop', 'Traffic_Signal']
+    feature_counts = {feat: df[feat].sum() for feat in road_features if feat in df.columns}
+    
+    plt.figure(figsize=(9, 5))
+    sns.barplot(x=list(feature_counts.keys()), y=list(feature_counts.values()), palette='cubehelix')
+    plt.title("Accidents Near Road Features / Infrastructure", fontsize=14, fontweight='bold')
+    plt.xlabel("Road Feature", fontsize=12)
+    plt.ylabel("Accident Count", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+    plt.figure(figsize=(11, 6))
+    sns.scatterplot(
+        data=df, 
+        x='Start_Lng', 
+        y='Start_Lat', 
+        hue='Severity', 
+        palette='Spectral', 
+        alpha=0.6, 
+        s=15
+    )
+    plt.title("Geographic Accident Hotspots (US)", fontsize=14, fontweight='bold')
+    plt.xlabel("Longitude", fontsize=12)
+    plt.ylabel("Latitude", fontsize=12)
+    plt.legend(title='Severity')
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    main()............. traffic
